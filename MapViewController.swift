@@ -6,23 +6,41 @@
 //  Copyright (c) 2015 Cesar Colorado. All rights reserved.
 //
 
-import UIKit
 import MapKit
+import Foundation
+import UIKit
+
 
 class MapViewController: UIViewController, MKMapViewDelegate {
     
-    @IBOutlet weak var mapView: MKMapView!
+   
+    @IBOutlet weak var studentMap: MKMapView!
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
-        
+       
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        if annotation is MKPointAnnotation {
+            let pinAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "myPin")
+            
+            pinAnnotationView.draggable = true
+            pinAnnotationView.canShowCallout = true
+            
+        
+            return pinAnnotationView
+        }
+        
+        return nil
+
+    }
+    
+    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+       //
     }
     
     

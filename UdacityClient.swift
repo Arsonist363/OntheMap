@@ -7,11 +7,16 @@
 //
 
 import Foundation
+import UIKit
 
 class UdacityClient : NSObject {
     
     /* Shared session */
     var session: NSURLSession
+    var err: NSError? = nil
+    
+    //var appDelegate: AppDelegate!
+
     
     override init() {
         session = NSURLSession.sharedSession()
@@ -19,37 +24,117 @@ class UdacityClient : NSObject {
     }
     
     //LOGIN- POST
-    func authentication(userName:String,password:String, completionHandler: (success: Bool, error: String?)-> Void){
+    func authentication(userName: String, password:String , completionHandler: (success: Bool, error: String?) -> Void){
     
         /* 1. Set the parameters */
-         var jsonBody = ["udacity" : ["username" : userName, "password" : password]]
-    
+        let jsonBody = ["udacity" : ["username" : userName, "password" : password]]
+       
         /* 2. Build the URL */
         let url = NSURL(string: "https://www.udacity.com/api/session")!
     
-    
         /* 3. Configure the request */
         let request = NSMutableURLRequest(URL: url)
-        var jsonifyError: NSError? = nil
         request.HTTPMethod = "POST"
+        
+        // Headers
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.HTTPBody = NSJSONSerialization.dataWithJSONObject(jsonBody, options: nil, error: &jsonifyError)
+        request.HTTPBody = try! NSJSONSerialization.dataWithJSONObject(jsonBody, options: NSJSONWritingOptions.PrettyPrinted)
         
         /* 4. Make the request */
+    
         let task = session.dataTaskWithRequest(request) {data, response, error in
             if error != nil {
-                completionHandler(success: false, error: "There was an error contacting the server")
-                println("Could not complete the request \(error)")
+                //completionHandler(success: false, error: "There was an error contacting the server")
+                print("Could not complete the request \(error)")
             } else {
             /* 5/6. Parse the data and use the data (happens in completion handler) */
-                let newData = data.subdataWithRange(NSMakeRange(5, data.length - 5)) /* subset response data! */
-                println(NSString(data: newData, encoding: NSUTF8StringEncoding))
+                let newData = data!.subdataWithRange(NSMakeRange(5, data!.length - 5)) /* subset response data! */
+                let response = try! NSJSONSerialization.JSONObjectWithData(newData, options: NSJSONReadingOptions.AllowFragments) as? [String : AnyObject]
+                
+                if let error = response!["error"] as? String {
+                    completionHandler(success: false, error: error)
+                    
+                } else {
+                    let student: Student = Student(dictionary: response!)
+                    let key = student.key
+                    self.saveUser(student)
+                    print(key)
+                    
+                    self.studentInfo(key){ (success, error) in
+                        if success{
+                            completionHandler(success: true, error: nil)
+                        }
+                        else {
+                            completionHandler(success: false, error: error)
+                        }
+                    }
+
+                    
+                }
             }
             
         }
         
         /* 7. Start the request */
-        task.resume()
+        task!.resume()
     }
+    
+    func studentInfo(key: String, completionHandler: (success: Bool, error: String?) -> Void){
+        /* 1. Set the parameters */
+            // None
+        
+        /* 2. Build the URL */
+        
+        let url = NSURL(string: "https://www.udacity.com/api/users/" + key)!
+        
+        
+        /* 3. Configure the request */
+        let request = NSMutableURLRequest(URL: url)
+        
+        /* 4. Make the request */
+        let task = session.dataTaskWithRequest(request) {data, response, error in
+            if error != nil {
+                //completionHandler(success: false, error: "There was an error contacting the server")
+                print("Could not complete the request \(error)")
+            } else {
+                /* 5/6. Parse the data and use the data (happens in completion handler) */
+                let newData = data!.subdataWithRange(NSMakeRange(5, data!.length - 5)) /* subset response data! */
+                let response = try! NSJSONSerialization.JSONObjectWithData(newData, options: NSJSONReadingOptions.AllowFragments) as? [String : AnyObject]
+            
+                if let error = response!["error"] as? String {
+                    completionHandler(success: false, error: error)
+                   
+                } else {
+                    if let appDelegate = UIApplication.sharedApplication().delegate as? AppDelegate{
+                        var student = appDelegate.student
+                        
+                        let userResponse = response!["user"] as! [String: AnyObject]
+                        print(userResponse)
+                        
+
+                        student?.firstName = userResponse["first_name"] as! String
+                        student?.lastName = userResponse["last_name"] as! String
+                        
+                        self.saveUser(student!)
+                        
+                    }
+                    completionHandler(success: true, error: nil)
+                }
+            }
+            
+        }
+        
+        /* 7. Start the request */
+        task!.resume()
+
+    }
+    
+    func saveUser(udacityStudent: Student){
+        if let appDelegate = UIApplication.sharedApplication().delegate as? AppDelegate{
+            appDelegate.student = udacityStudent
+            
+        }
+    }
+    
 }
