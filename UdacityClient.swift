@@ -14,8 +14,6 @@ class UdacityClient : NSObject {
     /* Shared session */
     var session: NSURLSession
     var err: NSError? = nil
-    
-    //var appDelegate: AppDelegate!
 
     
     override init() {
@@ -39,7 +37,8 @@ class UdacityClient : NSObject {
         // Headers
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.HTTPBody = try! NSJSONSerialization.dataWithJSONObject(jsonBody, options: NSJSONWritingOptions.PrettyPrinted)
+        request.HTTPBody = NSJSONSerialization.dataWithJSONObject(jsonBody, options: NSJSONWritingOptions.PrettyPrinted, error:nil)
+            
         
         /* 4. Make the request */
     
@@ -50,18 +49,17 @@ class UdacityClient : NSObject {
             } else {
             /* 5/6. Parse the data and use the data (happens in completion handler) */
                 let newData = data!.subdataWithRange(NSMakeRange(5, data!.length - 5)) /* subset response data! */
-                let response = try! NSJSONSerialization.JSONObjectWithData(newData, options: NSJSONReadingOptions.AllowFragments) as? [String : AnyObject]
+                let response = NSJSONSerialization.JSONObjectWithData(newData, options: NSJSONReadingOptions.AllowFragments, error: nil) as? [String : AnyObject]
                 
                 if let error = response!["error"] as? String {
                     completionHandler(success: false, error: error)
                     
                 } else {
-                    let student: Student = Student(dictionary: response!)
-                    let key = student.key
-                    self.saveUser(student)
-                    print(key)
+                    let newstudent: Student = Student(dictionary: response!)
+                    let key = newstudent.uniqueKey
+                    self.saveUser(newstudent)
                     
-                    self.studentInfo(key){ (success, error) in
+                    self.studentInfo(key!){ (success, error) in
                         if success{
                             completionHandler(success: true, error: nil)
                         }
@@ -77,7 +75,7 @@ class UdacityClient : NSObject {
         }
         
         /* 7. Start the request */
-        task!.resume()
+        task.resume()
     }
     
     func studentInfo(key: String, completionHandler: (success: Bool, error: String?) -> Void){
@@ -100,18 +98,17 @@ class UdacityClient : NSObject {
             } else {
                 /* 5/6. Parse the data and use the data (happens in completion handler) */
                 let newData = data!.subdataWithRange(NSMakeRange(5, data!.length - 5)) /* subset response data! */
-                let response = try! NSJSONSerialization.JSONObjectWithData(newData, options: NSJSONReadingOptions.AllowFragments) as? [String : AnyObject]
+                let response = NSJSONSerialization.JSONObjectWithData(newData, options: NSJSONReadingOptions.AllowFragments, error: nil) as? [String : AnyObject]
             
                 if let error = response!["error"] as? String {
                     completionHandler(success: false, error: error)
                    
                 } else {
+                    // add the student first and last name to dataset
                     if let appDelegate = UIApplication.sharedApplication().delegate as? AppDelegate{
                         var student = appDelegate.student
                         
                         let userResponse = response!["user"] as! [String: AnyObject]
-                        print(userResponse)
-                        
 
                         student?.firstName = userResponse["first_name"] as! String
                         student?.lastName = userResponse["last_name"] as! String
@@ -126,7 +123,7 @@ class UdacityClient : NSObject {
         }
         
         /* 7. Start the request */
-        task!.resume()
+        task.resume()
 
     }
     

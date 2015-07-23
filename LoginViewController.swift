@@ -22,6 +22,7 @@ class LoginViewController: UIViewController {
         super.viewDidLoad()
         /* Get the app delegate */
         appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        ParseClient.sharedInstance().getStudents()
         
 
     }
@@ -33,17 +34,14 @@ class LoginViewController: UIViewController {
         } else if passwordTextField.text!.isEmpty {
             showAlert("Missing user password")
         } else {
-            
             UdacityClient().authentication( usernameTextField.text!, password: passwordTextField.text!){ (success, error) in
-                if success{
+                if success {
                     self.completeLogin()
-                    ParseClient.sharedInstance().getStudents()
-                    }
+                }
                 else {
                     self.showAlert(error!)
-                    }
                 }
-
+            }
         }
     }
     

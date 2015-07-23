@@ -16,10 +16,15 @@ class ParseClient : NSObject{
     var session: NSURLSession
     var err: NSError? = nil
     
-    //var appDelegate: AppDelegate!
+    var appDelegate: AppDelegate!
+    var student: Student?
     
     override init() {
         session = NSURLSession.sharedSession()
+        
+        appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        student = appDelegate.student
+        
         super.init()
     }
     
@@ -27,8 +32,6 @@ class ParseClient : NSObject{
     //GETting StudentLocations
     
     func getStudents() {
-        
-        session = NSURLSession.sharedSession()
         
         /* 1. Set the parameters */
         //optional not used
@@ -54,7 +57,7 @@ class ParseClient : NSObject{
             }
             else {
                 /* 5/6. Parse the data and use the data (happens in completion handler) */
-                let response = try! NSJSONSerialization.JSONObjectWithData(studentData!, options: NSJSONReadingOptions.AllowFragments) as? [String : AnyObject]
+                let response = NSJSONSerialization.JSONObjectWithData(studentData!, options: NSJSONReadingOptions.AllowFragments, error: nil) as? [String : AnyObject]
                 
                 if let error = response!["error"] as? String {
                     
@@ -72,8 +75,49 @@ class ParseClient : NSObject{
         
         
         /* 7. Start the request */
-        task!.resume()
+        task.resume()
     }
+    //POSTing a StudentLocation
+    func postStudents(){
+        
+        /* 1. Set the parameters */
+        let parameters:[String: AnyObject] = [
+            "firstName": self.student?.firstName,
+            "lastName": self.student?.lastName,
+            "latitude": self.student?.latitude,
+            "longitude": self.student?.longitude,
+            "mapString": self.student?.mapString,
+            "mediaURL": self.student?.mediaURL ,
+            "uniqueKey": self.student?.uniqueKey
+        ]
+        
+        /* 2. Build the URL */
+        var URL = NSURL(string: "https://api.parse.com/1/classes/StudentLocation")
+        
+        /* 3. Configure the request */
+        let request = NSMutableURLRequest(URL: URL!)
+        request.HTTPMethod = "POST"
+        
+        // Headers
+        
+        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
+        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.HTTPBody = NSJSONSerialization.dataWithJSONObject(parameters, options: NSJSONWritingOptions.PrettyPrinted, error:nil)
+        
+        
+        let task = session.dataTaskWithRequest(request) {data, response, error in
+            if error != nil {
+                //completionHandler(success: false, error: "There was an error contacting the server")
+                println("Could not complete the request \(error)")
+            } else {
+                /* 5/6. Parse the data and use the data (happens in completion handler) */
+                println(NSString(data: data, encoding: NSUTF8StringEncoding))
+            }
+        }
+     task.resume()
+    }
+    
     class func sharedInstance() -> ParseClient {
         
         struct Singleton {

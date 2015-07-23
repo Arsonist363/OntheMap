@@ -12,18 +12,16 @@ import UIKit
 class ListViewController: UITableViewController {
     
     @IBOutlet weak var studentsTableView: UITableView!
+    
     var appDelegate: AppDelegate!
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-        
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
         appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        
+        
         
      
     }
@@ -36,27 +34,27 @@ class ListViewController: UITableViewController {
     // MARK: - Table view data source
     
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
+        // return the number of sections
         return 1
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
+        // return the number of rows
         return (appDelegate.students?.count)!
     }
     
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("StudentsTableViewCell", forIndexPath: indexPath)
+        let cell: AnyObject = tableView.dequeueReusableCellWithIdentifier("StudentsTableViewCell", forIndexPath: indexPath)
         let student = appDelegate.students![indexPath.row]
         
         // Configure the cell...
         let studentsName = student.firstName + " " + student.lastName
-        cell.textLabel!.text = studentsName
-        cell.detailTextLabel!.text = student.mapString
+        cell.textLabel!!.text = studentsName
+        cell.detailTextLabel!!.text = student.mapString
         
         
-        return cell
+        return cell as! UITableViewCell
     }
     
     

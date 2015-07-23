@@ -6,9 +6,10 @@
 //  Copyright (c) 2015 Cesar Colorado. All rights reserved.
 //
 
-import MapKit
+
 import Foundation
 import UIKit
+import MapKit
 
 
 class MapViewController: UIViewController, MKMapViewDelegate {
@@ -16,31 +17,66 @@ class MapViewController: UIViewController, MKMapViewDelegate {
    
     @IBOutlet weak var studentMap: MKMapView!
     
-    
+    var appDelegate: AppDelegate!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-       
+        
+        appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        
+        
+        let locations = appDelegate.students!
+        
+        var annotations = [MKPointAnnotation]()
+        
+        for students in locations{
+            
+            let lat = CLLocationDegrees(students.latitude as Double)
+            let long = CLLocationDegrees(students.longitude as Double)
+            
+            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+            
+            let first = students.firstName as String
+            let last = students.lastName as String
+            let mediaURL = students.mediaURL as String
+            
+            // Here we create the annotation and set its coordiate, title, and subtitle properties
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            annotation.title = "\(first) \(last)"
+            annotation.subtitle = mediaURL
+            
+            annotations.append(annotation)
+        }
+        self.studentMap.addAnnotations(annotations)
     }
+    
     
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        if annotation is MKPointAnnotation {
-            let pinAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "myPin")
-            
-            pinAnnotationView.draggable = true
-            pinAnnotationView.canShowCallout = true
-            
+        let reuseId = "pin"
         
-            return pinAnnotationView
+        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+        
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = true
+            pinView!.pinColor = .Red
+            
+        }
+            
+        else {
+            pinView!.annotation = annotation
         }
         
-        return nil
-
+        return pinView
     }
     
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-       //
+    func mapView(mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        
+        if control == annotationView.rightCalloutAccessoryView {
+            let app = UIApplication.sharedApplication()
+            app.openURL(NSURL(string: ((annotationView.annotation?.subtitle)!)!)!)
+        }
     }
     
     

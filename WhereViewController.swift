@@ -7,22 +7,30 @@
 //
 
 import UIKit
+import MapKit
 
-class WhereViewController: UIViewController {
+class WhereViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var locationTextField: UITextField!
     
+    var appDelegate: AppDelegate!
+    var student: Student?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let appDelegate = UIApplication.sharedApplication().delegate as? AppDelegate{
-            let firstName = appDelegate.student?.firstName
-            let lastName = appDelegate.student?.lastName
-            let name = firstName! + " " + lastName!
-            nameLabel.text = "Hi" + " " + name
+        appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        student = appDelegate.student
+        
+        
+        let firstName = student!.firstName
+        let lastName = student!.lastName
+        let name = firstName! + " " + lastName!
+        nameLabel.text = "Hi" + " " + name
             
-        }
+        self.locationTextField.delegate = self
+        locationTextField.text = "New York, NY"
 
         // Do any additional setup after loading the view.
     }
@@ -48,11 +56,57 @@ class WhereViewController: UIViewController {
             self.presentViewController(controller, animated: true, completion: nil)
         })
     }
+    
+    //dismiss keyboard after return is pressed
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        locationTextField.resignFirstResponder()
+        return true;
+    }
+
 
     @IBAction func goToWhereMap(sender: AnyObject) {
-        dispatch_async(dispatch_get_main_queue(), {
-            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("WhereMapViewController") as UIViewController
-            self.presentViewController(controller, animated: true, completion: nil)
-        })
+            if locationTextField.text == ""{
+                self.showError("text field empty")
+        }
+            else {
+                let geoCoder = CLGeocoder()
+                geoCoder.geocodeAddressString(locationTextField.text!){textlocation, error in
+                    if(error != nil){
+                        self.showError("Invalid location")
+                    }
+                    else{
+                        var location:CLPlacemark = textlocation[0] as! CLPlacemark
+                
+                        var coordinates:CLLocationCoordinate2D = location.location.coordinate
+                
+                        var lat = coordinates.latitude
+                        var long = coordinates.longitude
+                
+                        self.student?.latitude = lat
+                        self.student?.longitude = long
+                
+                        self.saveUser(self.student!)
+                
+                        dispatch_async(dispatch_get_main_queue(), {
+                            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("WhereMapViewController") as! UIViewController
+                            self.presentViewController(controller, animated: true, completion: nil)
+                        })
+                
+                    }
+                }
+            }
+            student?.mapString = locationTextField.text!
+            self.saveUser(student!)
     }
+    func showError(error: String){
+        let alert = UIAlertView()
+        alert.title = "Error"
+        alert.message = error
+        alert.addButtonWithTitle("OK")
+        alert.show()
+    }
+    
+    func saveUser(udacityStudent: Student){
+        appDelegate.student = udacityStudent
+        }
 }

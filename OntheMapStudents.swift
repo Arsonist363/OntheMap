@@ -17,7 +17,7 @@ struct Students {
     var latitude = 0.0
     var longitude = 0.0
     var mapString = ""
-    var mediaURL = "Google.com"
+    var mediaURL = ""
     var objectID = ""
     var uniqueKey = ""
     var updatedAt = ""
@@ -25,9 +25,6 @@ struct Students {
     /* Construct a Students from a dictionary */
     init(dictionary: [String: AnyObject]){
 
-        if let createdAt = dictionary["createdAt"] as? String {
-            firstName = createdAt
-        }
         if let first = dictionary["firstName"] as? String {
             firstName = first
         }
@@ -51,9 +48,6 @@ struct Students {
         }
         if let key = dictionary["uniqueKey"] as? String {
             uniqueKey = key
-        }
-        if let updatedAt = dictionary["updatedAt"] as? String {
-            uniqueKey = updatedAt
         }
     }
     
