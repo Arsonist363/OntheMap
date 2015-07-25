@@ -6,8 +6,6 @@
 //  Copyright (c) 2015 Cesar Colorado. All rights reserved.
 //
 
-
-import Foundation
 import UIKit
 import MapKit
 
@@ -15,21 +13,25 @@ import MapKit
 class MapViewController: UIViewController, MKMapViewDelegate {
     
    
-    @IBOutlet weak var studentMap: MKMapView!
+    @IBOutlet weak var mapView: MKMapView!
     
     var appDelegate: AppDelegate!
     
+    @IBOutlet weak var uiActivityInd: UIActivityIndicatorView!
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // call the delegat to allow to access data
         appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         
+        // make the view controller the delegat to allow info button
+        mapView.delegate = self;
         
         let locations = appDelegate.students!
         
         var annotations = [MKPointAnnotation]()
         
-        for students in locations{
+        for students in locations {
             
             let lat = CLLocationDegrees(students.latitude as Double)
             let long = CLLocationDegrees(students.longitude as Double)
@@ -40,7 +42,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             let last = students.lastName as String
             let mediaURL = students.mediaURL as String
             
-            // Here we create the annotation and set its coordiate, title, and subtitle properties
+            // create the annotation and set its coordiate, title, and subtitle properties
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
             annotation.title = "\(first) \(last)"
@@ -48,11 +50,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             
             annotations.append(annotation)
         }
-        self.studentMap.addAnnotations(annotations)
+        
+        self.mapView.addAnnotations(annotations)
+
     }
     
+    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
     
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "pin"
         
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
@@ -61,9 +65,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = true
             pinView!.pinColor = .Red
-            
+            pinView!.rightCalloutAccessoryView = UIButton.buttonWithType(.DetailDisclosure) as! UIButton
         }
-            
         else {
             pinView!.annotation = annotation
         }
@@ -71,11 +74,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         return pinView
     }
     
-    func mapView(mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        
+    func mapView(mapView: MKMapView!, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+      
         if control == annotationView.rightCalloutAccessoryView {
             let app = UIApplication.sharedApplication()
-            app.openURL(NSURL(string: ((annotationView.annotation?.subtitle)!)!)!)
+            app.openURL(NSURL(string: annotationView.annotation.subtitle!)!)
         }
     }
     

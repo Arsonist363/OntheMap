@@ -8,25 +8,44 @@
 
 import Foundation
 
-import Foundation
+
 
 struct Student {
-    var id : String?
-    var uniqueKey : String?
-    var firstName : String?
-    var lastName: String?
+    var id = ""
+    var uniqueKey = ""
+    var firstName = ""
+    var lastName = ""
     var latitude = 40.7127827
     var longitude = -74.0059413
-    var mediaURL : String?
-    var mapString : String?
+    var mediaURL = ""
+    var mapString = ""
 
-    /* Construct a Student id from a dictionary */
+    
     init(dictionary: [String: AnyObject]){
-        if let session = dictionary["session"] as? [String: AnyObject] {
-            if let account = dictionary["account"] as? [String: AnyObject] {
-                id = session["id"] as? String
-                uniqueKey = account["key"] as? String
-            }
+        if let first = dictionary["firstName"] as? String{
+            firstName = first
+        }
+        
+        if let last = dictionary["lastName"] as? String {
+            lastName = last
+        }
+        if let lat = dictionary["latitude"] as? Double {
+            latitude = lat
+        }
+        if let long = dictionary["longitude"] as? Double {
+            longitude = long
+        }
+        if let location = dictionary["mapString"] as? String {
+            mapString = location
+        }
+        if let url = dictionary["mediaURL"] as? String {
+            mediaURL = url
+        }
+        if let objectid = dictionary["id"] as? String {
+            id = objectid
+        }
+        if let key = dictionary["uniqueKey"] as? String {
+            uniqueKey = key
         }
     }
     

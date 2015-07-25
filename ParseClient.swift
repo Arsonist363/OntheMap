@@ -17,13 +17,13 @@ class ParseClient : NSObject{
     var err: NSError? = nil
     
     var appDelegate: AppDelegate!
-    var student: Student?
+    
     
     override init() {
         session = NSURLSession.sharedSession()
         
         appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        student = appDelegate.student
+        
         
         super.init()
     }
@@ -31,8 +31,7 @@ class ParseClient : NSObject{
     
     //GETting StudentLocations
     
-    func getStudents() {
-        
+    func getStudents(completionHandler: (success: Bool, error: String?) -> Void) {
         /* 1. Set the parameters */
         //optional not used
         
@@ -52,21 +51,22 @@ class ParseClient : NSObject{
         /* 4. Make the request */
         let task = session.dataTaskWithRequest(request) {studentData, response, error in
             if error != nil {
-                let statusCode = (response as! NSHTTPURLResponse).statusCode
-                print("URL Session Task Succeeded: HTTP \(statusCode)")
+                //let statusCode = (response as! NSHTTPURLResponse).statusCode
+                completionHandler(success: false, error: "There was an error contacting the Parse server")
+                //print("URL Session Task Succeeded: HTTP \(statusCode)")
             }
             else {
                 /* 5/6. Parse the data and use the data (happens in completion handler) */
                 let response = NSJSONSerialization.JSONObjectWithData(studentData!, options: NSJSONReadingOptions.AllowFragments, error: nil) as? [String : AnyObject]
                 
                 if let error = response!["error"] as? String {
-                    
+                    completionHandler(success: false, error: error)
                     
                 } else {
                     let results = response!["results"] as! [[String: AnyObject]]
                     var students = Students.studentsFromResults(results)
                     self.saveUser(students)
-                    
+                    completionHandler(success: true, error: nil)
                 }
             }
             
@@ -78,18 +78,25 @@ class ParseClient : NSObject{
         task.resume()
     }
     //POSTing a StudentLocation
-    func postStudents(){
+    func postStudents(completionHandler: (success: Bool, error: String?) -> Void){
         
         /* 1. Set the parameters */
-        let parameters:[String: AnyObject] = [
-            "firstName": self.student?.firstName,
-            "lastName": self.student?.lastName,
-            "latitude": self.student?.latitude,
-            "longitude": self.student?.longitude,
-            "mapString": self.student?.mapString,
-            "mediaURL": self.student?.mediaURL ,
-            "uniqueKey": self.student?.uniqueKey
-        ]
+        let firstName = appDelegate.student?.firstName
+        let lastName = appDelegate.student?.lastName
+        let latitude = appDelegate.student?.latitude
+        let longitude = appDelegate.student?.longitude
+        let mapString = appDelegate.student?.mapString
+        let mediaURL = appDelegate.student?.mediaURL
+        let uniqueKey = appDelegate.student?.uniqueKey
+    
+        
+        var parameters : [String:AnyObject] = ["firstName" : firstName!, "lastName" : lastName!,
+            "latitude" : latitude!,
+            "longitude" : longitude!,
+            "mapString" : mapString!,
+            "mediaURL" : mediaURL!,
+            "uniqueKey" : uniqueKey!]
+        
         
         /* 2. Build the URL */
         var URL = NSURL(string: "https://api.parse.com/1/classes/StudentLocation")
@@ -108,11 +115,18 @@ class ParseClient : NSObject{
         
         let task = session.dataTaskWithRequest(request) {data, response, error in
             if error != nil {
-                //completionHandler(success: false, error: "There was an error contacting the server")
-                println("Could not complete the request \(error)")
+                completionHandler(success: false, error: "There was an error contacting the Parse server")
             } else {
                 /* 5/6. Parse the data and use the data (happens in completion handler) */
-                println(NSString(data: data, encoding: NSUTF8StringEncoding))
+    
+                let response = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments, error: nil) as? [String : AnyObject]
+                
+                if let error = response!["error"] as? String {
+                    completionHandler(success: false, error: error)
+                }else{
+                    completionHandler(success: true, error: nil)
+                }
+                
             }
         }
      task.resume()
@@ -130,8 +144,8 @@ class ParseClient : NSObject{
     func saveUser(udacityStudent: [Students]){
         if let appDelegate = UIApplication.sharedApplication().delegate as? AppDelegate{
             appDelegate.students = udacityStudent
-
         }
     }
+    
 
 }

@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class ListViewController: UITableViewController {
+class ListViewController: UITableViewController, UITableViewDataSource, UITableViewDelegate{
     
     @IBOutlet weak var studentsTableView: UITableView!
     
@@ -21,8 +21,8 @@ class ListViewController: UITableViewController {
         
         appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         
-        
-        
+        // useed to fix the table being covered by the navbar
+        self.tableView.contentInset = UIEdgeInsetsMake(55,0,0,0);
      
     }
     

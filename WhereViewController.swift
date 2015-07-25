@@ -13,6 +13,9 @@ class WhereViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var locationTextField: UITextField!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var findButton: UIButton!
+    @IBOutlet weak var activityView: UIView!
     
     var appDelegate: AppDelegate!
     var student: Student?
@@ -26,13 +29,23 @@ class WhereViewController: UIViewController, UITextFieldDelegate {
         
         let firstName = student!.firstName
         let lastName = student!.lastName
-        let name = firstName! + " " + lastName!
+        let name = firstName + " " + lastName
         nameLabel.text = "Hi" + " " + name
             
         self.locationTextField.delegate = self
-        locationTextField.text = "New York, NY"
+        
 
-        // Do any additional setup after loading the view.
+        activityIndicator.stopAnimating()
+        activityView.hidden = true
+        
+        findButton.backgroundColor = UIColor.clearColor()
+        findButton.layer.cornerRadius = 5
+        findButton.layer.borderWidth = 1
+        findButton.layer.borderColor = UIColor.blackColor().CGColor
+        
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: "handleSingleTap:")
+        tapRecognizer.numberOfTapsRequired = 1
+        self.view.addGestureRecognizer(tapRecognizer)
     }
 
     override func didReceiveMemoryWarning() {
@@ -41,18 +54,10 @@ class WhereViewController: UIViewController, UITextFieldDelegate {
     }
     
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
+    
     @IBAction func returnToMain(sender: AnyObject) {
         dispatch_async(dispatch_get_main_queue(), {
-            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("MainNavigationController") as! UINavigationController
+            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("ViewController") as! ViewController
             self.presentViewController(controller, animated: true, completion: nil)
         })
     }
@@ -66,15 +71,21 @@ class WhereViewController: UIViewController, UITextFieldDelegate {
 
     @IBAction func goToWhereMap(sender: AnyObject) {
             if locationTextField.text == ""{
-                self.showError("text field empty")
+                self.showAlert("You must enter a valid address")
         }
             else {
+                self.activityView.hidden = true
+                self.activityIndicator.startAnimating()
                 let geoCoder = CLGeocoder()
                 geoCoder.geocodeAddressString(locationTextField.text!){textlocation, error in
                     if(error != nil){
-                        self.showError("Invalid location")
+                        self.activityIndicator.stopAnimating()
+                        self.showAlert("Invalid location")
                     }
                     else{
+                        self.activityView.hidden = true
+                        self.activityIndicator.stopAnimating()
+                        
                         var location:CLPlacemark = textlocation[0] as! CLPlacemark
                 
                         var coordinates:CLLocationCoordinate2D = location.location.coordinate
@@ -98,15 +109,39 @@ class WhereViewController: UIViewController, UITextFieldDelegate {
             student?.mapString = locationTextField.text!
             self.saveUser(student!)
     }
-    func showError(error: String){
-        let alert = UIAlertView()
-        alert.title = "Error"
-        alert.message = error
-        alert.addButtonWithTitle("OK")
-        alert.show()
-    }
     
     func saveUser(udacityStudent: Student){
         appDelegate.student = udacityStudent
         }
+    
+  
+    @IBAction func cancelRetun(sender: AnyObject) {
+        dispatch_async(dispatch_get_main_queue(), {
+            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("MainNavigationController") as! UINavigationController
+            self.presentViewController(controller, animated: true, completion: nil)
+        })
+    }
+    
+    // Displays any errrors
+    private func showAlert(alert:String){
+        dispatch_async(dispatch_get_main_queue(), {
+            let alertController = UIAlertController(title: "On the map", message: alert, preferredStyle: .Alert)
+            alertController.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
+            self.presentViewController(alertController,animated:true, completion:nil)
+            self.activityView.hidden = true
+        })
+    }
+    
+    func textFieldDidBeginEditing(textField: UITextField) {
+        // Erase default text.
+        if locationTextField.text == "Enter Your Location Here"{
+            textField.text = ""
+        }
+    }
+    
+    // ends editing on outside tap
+    func handleSingleTap(recognizer: UITapGestureRecognizer) {
+        self.view.endEditing(true)
+    }
+
 }

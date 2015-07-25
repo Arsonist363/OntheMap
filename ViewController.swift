@@ -7,14 +7,20 @@
 //
 
 import UIKit
+import FBSDKLoginKit
 
-class ViewController: UITabBarController {
+class ViewController: UITabBarController{
     
     var appDelegate: AppDelegate!
     
+    var activityView = UIActivityIndicatorView(activityIndicatorStyle: .WhiteLarge)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        // add delegate to access data
+        appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        
+        // add buttons on the navigation bar
         self.title = "On The Map"
         let pin = UIBarButtonItem(image:UIImage(named:"pin.png"), style:.Plain, target:self, action:"gotoWhere")
        
@@ -24,6 +30,13 @@ class ViewController: UITabBarController {
         
         self.navigationItem.rightBarButtonItems = [refresh, pin]
         self.navigationItem.leftBarButtonItems = [logOut]
+        
+        // add the activityindicator to the view
+        activityView.center = self.view.center
+        activityView.color = UIColor.blueColor()
+        activityView.stopAnimating()
+        self.view.addSubview(activityView)
+
                 
     }
 
@@ -38,18 +51,46 @@ class ViewController: UITabBarController {
             self.presentViewController(controller, animated: true, completion: nil)
         })
         }
+    
     @IBAction func refresh(){
-        ParseClient.sharedInstance().getStudents()
-    }
+        self.activityView.startAnimating()
+        ParseClient.sharedInstance().getStudents(){ (success, error) in
+            if success {
+                self.activityView.stopAnimating()
+            }
+            else {
+                self.activityView.stopAnimating()
+                self.showAlert(error!)
+            }
+        }
 
+    }
+    
 
     @IBAction func logOut(){
+        // logg of the session
+        UdacityClient.sharedInstance().logginOut(){ (success, error) in
+            if success {
+                FBSDKLoginManager().logOut()
+                dispatch_async(dispatch_get_main_queue(), {
+                    let controller = self.storyboard!.instantiateViewControllerWithIdentifier("LoginViewCotroller") as! UIViewController
+                    self.presentViewController(controller, animated: true, completion: nil)
+                })
+            }
+            else {
+                self.showAlert(error!)
+            }
+        }
+
         
+    }
+    // Alert message
+    private func showAlert(alert:String){
         dispatch_async(dispatch_get_main_queue(), {
-            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("LoginViewCotroller") as! UIViewController
-            self.presentViewController(controller, animated: true, completion: nil)
+            let alertController = UIAlertController(title: "On the map", message: alert, preferredStyle: .Alert)
+            alertController.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
+            self.presentViewController(alertController,animated:true, completion:nil)
         })
     }
-
 }
 
