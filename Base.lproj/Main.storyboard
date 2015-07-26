@@ -239,18 +239,46 @@
                                 <rect key="frame" x="0.0" y="5" width="600" height="600"/>
                                 <animations/>
                             </mapView>
+                            <view alpha="0.40000000596046448" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FfF-7V-Qx3">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <subviews>
+                                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="9W0-rT-E5b">
+                                        <rect key="frame" x="276" y="286" width="37" height="37"/>
+                                        <animations/>
+                                        <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <animations/>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="centerY" secondItem="9W0-rT-E5b" secondAttribute="centerY" id="569-Ll-jNw"/>
+                                    <constraint firstAttribute="centerX" secondItem="9W0-rT-E5b" secondAttribute="centerX" id="ESg-U6-IlL"/>
+                                    <constraint firstAttribute="centerY" secondItem="9W0-rT-E5b" secondAttribute="centerY" id="MIP-ut-pTB"/>
+                                    <constraint firstAttribute="centerX" secondItem="9W0-rT-E5b" secondAttribute="centerX" id="fvX-Vv-2wu"/>
+                                    <constraint firstAttribute="centerY" secondItem="9W0-rT-E5b" secondAttribute="centerY" id="g8c-ZP-UkJ"/>
+                                    <constraint firstAttribute="centerX" secondItem="9W0-rT-E5b" secondAttribute="centerX" id="kJs-MG-ge2"/>
+                                    <constraint firstAttribute="centerX" secondItem="9W0-rT-E5b" secondAttribute="centerX" id="o5o-Sn-lrb"/>
+                                    <constraint firstAttribute="centerY" secondItem="9W0-rT-E5b" secondAttribute="centerY" id="y6V-Kf-2YT"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="cI7-cr-NUn" secondAttribute="trailing" constant="-16" id="8HA-15-Oha"/>
+                            <constraint firstItem="FfF-7V-Qx3" firstAttribute="leading" secondItem="hfp-VV-H7C" secondAttribute="leadingMargin" constant="-16" id="AC3-pk-hxK"/>
                             <constraint firstAttribute="bottomMargin" secondItem="cI7-cr-NUn" secondAttribute="bottom" constant="-5" id="CMk-vt-hPK"/>
                             <constraint firstItem="cI7-cr-NUn" firstAttribute="top" secondItem="hfp-VV-H7C" secondAttribute="topMargin" constant="5" id="Cxw-dW-1T7"/>
+                            <constraint firstItem="FfF-7V-Qx3" firstAttribute="bottom" secondItem="hfp-VV-H7C" secondAttribute="bottomMargin" id="Cyw-Mf-Ddc"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="FfF-7V-Qx3" secondAttribute="trailing" constant="-16" id="Vlf-kJ-NMw"/>
+                            <constraint firstItem="FfF-7V-Qx3" firstAttribute="top" secondItem="hfp-VV-H7C" secondAttribute="topMargin" id="hHE-gx-lGs"/>
                             <constraint firstItem="cI7-cr-NUn" firstAttribute="leading" secondItem="hfp-VV-H7C" secondAttribute="leadingMargin" constant="-16" id="yjI-FQ-N4O"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Map" image="map" id="V67-Tq-otg"/>
                     <connections>
+                        <outlet property="activityIndicator" destination="9W0-rT-E5b" id="fNP-K3-IsK"/>
+                        <outlet property="activityView" destination="FfF-7V-Qx3" id="jRn-1L-vaO"/>
                         <outlet property="mapView" destination="cI7-cr-NUn" id="1b6-Ew-if3"/>
                     </connections>
                 </viewController>

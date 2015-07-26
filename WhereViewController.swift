@@ -57,7 +57,7 @@ class WhereViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func returnToMain(sender: AnyObject) {
         dispatch_async(dispatch_get_main_queue(), {
-            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("ViewController") as! ViewController
+            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("MainNavigationController") as! UINavigationController
             self.presentViewController(controller, animated: true, completion: nil)
         })
     }

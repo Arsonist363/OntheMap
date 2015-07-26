@@ -93,24 +93,49 @@ class WhereMapViewController: UIViewController, UITextFieldDelegate  {
         self.activityIndicator.startAnimating()
         student?.mediaURL = urlTextField.text!
         self.saveUser(student!)
-        ParseClient.sharedInstance().postStudents(){ (success, error) in
-            if success {
-                ParseClient.sharedInstance().getStudents(){ (success, error) in
-                    if success {
-                        self.activityView.hidden = true
-                        self.activityIndicator.stopAnimating()
-                        self.gotomain()
-                    }
-                    else {
-                        self.activityIndicator.stopAnimating()
-                        self.showAlert(error!)
+        if appDelegate.student?.objectId == "" {
+            
+            ParseClient.sharedInstance().postStudents(){ (success, error) in
+                if success {
+                    ParseClient.sharedInstance().getStudents(){ (success, error) in
+                        if success {
+                            self.activityView.hidden = true
+                            self.activityIndicator.stopAnimating()
+                            self.gotomain()
+                        }
+                        else {
+                            self.activityIndicator.stopAnimating()
+                            self.showAlert(error!)
+                        }
                     }
                 }
+                else {
+                    self.showAlert(error!)
+                }
             }
-            else {
-                self.showAlert(error!)
+        
+        } else {
+            ParseClient.sharedInstance().putStudents(){ (success, error) in
+                if success {
+                    ParseClient.sharedInstance().getStudents(){ (success, error) in
+                        if success {
+                            self.activityView.hidden = true
+                            self.activityIndicator.stopAnimating()
+                            self.gotomain()
+                        }
+                        else {
+                            self.activityIndicator.stopAnimating()
+                            self.showAlert(error!)
+                        }
+                    }
+                }
+                else {
+                    self.showAlert(error!)
+                }
             }
+
         }
+        
 
     }
     
@@ -124,7 +149,7 @@ class WhereMapViewController: UIViewController, UITextFieldDelegate  {
     }
     func gotomain() {
         dispatch_async(dispatch_get_main_queue(), {
-            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("ViewController") as! ViewController
+            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("MainNavigationController") as! UINavigationController
             self.presentViewController(controller, animated: true, completion: nil)
         })
     }

@@ -14,6 +14,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
    
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var activityView: UIView!
     
     var appDelegate: AppDelegate!
     
@@ -49,10 +51,22 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             annotation.subtitle = mediaURL
             
             annotations.append(annotation)
+            
+            
         }
         
         self.mapView.addAnnotations(annotations)
 
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        activityIndicator.startAnimating()
+        activityView.hidden = false
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        activityIndicator.stopAnimating()
+        activityView.hidden = true
     }
     
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {

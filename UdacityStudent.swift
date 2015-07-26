@@ -19,6 +19,7 @@ struct Student {
     var longitude = -74.0059413
     var mediaURL = ""
     var mapString = ""
+    var objectId = ""
 
     
     init(dictionary: [String: AnyObject]){
@@ -46,6 +47,9 @@ struct Student {
         }
         if let key = dictionary["uniqueKey"] as? String {
             uniqueKey = key
+        }
+        if let objid = dictionary["objectId"] as? String {
+            objectId = objid
         }
     }
     

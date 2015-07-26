@@ -22,7 +22,7 @@ class ViewController: UITabBarController{
         
         // add buttons on the navigation bar
         self.title = "On The Map"
-        let pin = UIBarButtonItem(image:UIImage(named:"pin.png"), style:.Plain, target:self, action:"gotoWhere")
+        let pin = UIBarButtonItem(image:UIImage(named:"pin.png"), style:.Plain, target:self, action:"checkStudent")
        
         let refresh = UIBarButtonItem(image:UIImage(named:"refresh.png"),style:.Plain, target:self, action:"refresh")
         
@@ -37,7 +37,9 @@ class ViewController: UITabBarController{
         activityView.stopAnimating()
         self.view.addSubview(activityView)
 
-                
+        ParseClient.sharedInstance().queryStudents { (success, error) -> Void in
+        
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -45,6 +47,25 @@ class ViewController: UITabBarController{
         // Dispose of any resources that can be recreated.
     }
 
+    @IBAction func checkStudent(){
+        if appDelegate.student?.objectId != ""{
+            dispatch_async(dispatch_get_main_queue(), {
+                let alertController = UIAlertController(title: "On the map", message: "You already made a post. Would you like to Overite the location.", preferredStyle: .Alert)
+                let ok = UIAlertAction(title: "Cancel", style: .Default, handler: { (action) -> Void in
+                })
+                let cancel = UIAlertAction(title: "Overite", style: .Cancel) { (action) -> Void in
+                    self.gotoWhere()
+                }
+                alertController.addAction(ok)
+                alertController.addAction(cancel)
+                self.presentViewController(alertController,animated:true, completion:nil)
+            })
+        }else{
+            gotoWhere()
+        }
+    
+    }
+    
     @IBAction func gotoWhere(){
         dispatch_async(dispatch_get_main_queue(), {
             let controller = self.storyboard!.instantiateViewControllerWithIdentifier("WhereViewController") as! UIViewController
@@ -92,5 +113,7 @@ class ViewController: UITabBarController{
             self.presentViewController(alertController,animated:true, completion:nil)
         })
     }
+    
+    
 }
 
