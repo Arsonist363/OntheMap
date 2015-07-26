@@ -24,7 +24,6 @@ class ParseClient : NSObject{
         
         appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         
-        
         super.init()
     }
     
@@ -51,9 +50,7 @@ class ParseClient : NSObject{
         /* 4. Make the request */
         let task = session.dataTaskWithRequest(request) {studentData, response, error in
             if error != nil {
-                //let statusCode = (response as! NSHTTPURLResponse).statusCode
                 completionHandler(success: false, error: "There was an error contacting the Parse server")
-                //print("URL Session Task Succeeded: HTTP \(statusCode)")
             }
             else {
                 /* 5/6. Parse the data and use the data (happens in completion handler) */
@@ -84,33 +81,25 @@ class ParseClient : NSObject{
         
         /* 2. Build the URL */
         let urlString = "https://api.parse.com/1/classes/StudentLocation?where=%7B%22uniqueKey%22%3A%22" + uniqueKey! + "%22%7D"
-        println(urlString)
-        
         var URL = NSURL(string: urlString)!
         
         /* 3. Configure the request */
-        
         let request = NSMutableURLRequest(URL: URL)
         request.HTTPMethod = "GET"
         
         // Headers
-        
         request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
         request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
         
         /* 4. Make the request */
         let task = session.dataTaskWithRequest(request) {studentData, response, error in
             if error != nil {
-                //let statusCode = (response as! NSHTTPURLResponse).statusCode
                 completionHandler(success: false, error: "There was an error contacting the Parse server")
-                //print("URL Session Task Succeeded: HTTP \(statusCode)")
             }
             else {
                 /* 5/6. Parse the data and use the data (happens in completion handler) */
                 let response = NSJSONSerialization.JSONObjectWithData(studentData!, options: NSJSONReadingOptions.AllowFragments, error: nil) as? [String : AnyObject]
-                
-                println(response)
-                
+               
                 if let error = response!["error"] as? String {
                     completionHandler(success: false, error: error)
                     
@@ -133,9 +122,6 @@ class ParseClient : NSObject{
             }
             
         }
-        
-        
-        
         /* 7. Start the request */
         task.resume()
     }
@@ -151,24 +137,20 @@ class ParseClient : NSObject{
         let mapString = appDelegate.student?.mapString
         let mediaURL = appDelegate.student?.mediaURL
         let uniqueKey = appDelegate.student?.uniqueKey
-        let objectId = appDelegate.student?.objectId
     
-        
-        var parameters : [String:AnyObject] = ["firstName" : firstName!, "lastName" : objectId!,
+        var parameters : [String:AnyObject] = ["firstName" : firstName!, "lastName" : lastName!,
             "latitude" : latitude!,
             "longitude" : longitude!,
             "mapString" : mapString!,
             "mediaURL" : mediaURL!,
             "uniqueKey" : uniqueKey!]
         
-        
         /* 2. Build the URL */
-        let urlString = "https://api.parse.com/1/classes/StudentLocation/" + uniqueKey!
         var URL = NSURL(string: "https://api.parse.com/1/classes/StudentLocation")
         
         /* 3. Configure the request */
         let request = NSMutableURLRequest(URL: URL!)
-        request.HTTPMethod = "PUT"
+        request.HTTPMethod = "POST"
         
         // Headers
         
@@ -208,7 +190,7 @@ class ParseClient : NSObject{
         let mapString = appDelegate.student?.mapString
         let mediaURL = appDelegate.student?.mediaURL
         let uniqueKey = appDelegate.student?.uniqueKey
-        
+        let objectId = appDelegate.student?.objectId
         
         var parameters : [String:AnyObject] = ["firstName" : firstName!, "lastName" : lastName!,
             "latitude" : latitude!,
@@ -219,12 +201,13 @@ class ParseClient : NSObject{
         
         
         /* 2. Build the URL */
-        
-        var URL = NSURL(string: "https://api.parse.com/1/classes/StudentLocation")
+        let urlString = "https://api.parse.com/1/classes/StudentLocation/" + objectId!
+        println(urlString)
+        var URL = NSURL(string: urlString)
         
         /* 3. Configure the request */
         let request = NSMutableURLRequest(URL: URL!)
-        request.HTTPMethod = "POST"
+        request.HTTPMethod = "PUT"
         
         // Headers
         
@@ -239,9 +222,8 @@ class ParseClient : NSObject{
                 completionHandler(success: false, error: "There was an error contacting the Parse server")
             } else {
                 /* 5/6. Parse the data and use the data (happens in completion handler) */
-                
                 let response = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments, error: nil) as? [String : AnyObject]
-                
+              
                 if let error = response!["error"] as? String {
                     completionHandler(success: false, error: error)
                 }else{
@@ -274,25 +256,5 @@ class ParseClient : NSObject{
         }
     }
     
-    func escapedParameters(parameters: [String : AnyObject]) -> String {
-        
-        var urlVars = [String]()
-        
-        for (key, value) in parameters {
-            
-            /* Make sure that it is a string value */
-            let stringValue = "\(value)"
-            
-            /* Escape it */
-            let escapedValue = stringValue.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
-            
-            /* Append it */
-            urlVars += [key + "=" + "\(escapedValue!)"]
-            
-        }
-        
-        return (!urlVars.isEmpty ? "?" : "") + join("&", urlVars)
-    }
-
 
 }

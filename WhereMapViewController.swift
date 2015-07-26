@@ -94,7 +94,6 @@ class WhereMapViewController: UIViewController, UITextFieldDelegate  {
         student?.mediaURL = urlTextField.text!
         self.saveUser(student!)
         if appDelegate.student?.objectId == "" {
-            
             ParseClient.sharedInstance().postStudents(){ (success, error) in
                 if success {
                     ParseClient.sharedInstance().getStudents(){ (success, error) in
@@ -133,10 +132,7 @@ class WhereMapViewController: UIViewController, UITextFieldDelegate  {
                     self.showAlert(error!)
                 }
             }
-
         }
-        
-
     }
     
     //dismiss keyboard after return is pressed
